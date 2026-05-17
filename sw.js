@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barber-booking-v2';
+const CACHE_NAME = 'barber-booking-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,7 +9,8 @@ const STATIC_ASSETS = [
   '/js/admin.js',
   '/js/shop.js',
   '/icons/icon.svg',
-  '/manifest.json'
+  '/manifest.json',
+  '/manifest-admin.json'
 ];
 
 // Install: cache static assets
