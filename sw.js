@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barber-booking-v6';
+const CACHE_NAME = 'barber-booking-v7';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -37,13 +37,13 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
+  // Skip non-http(s) schemes (chrome-extension, etc)
+  if (!url.protocol.startsWith('http')) return;
+
   // API calls (Supabase) - always network
   if (url.hostname.includes('supabase.co')) {
     return;
   }
-
-  // Skip non-http(s) schemes (chrome-extension, etc)
-  if (!url.protocol.startsWith('http')) return;
 
   // CDN resources - network first, fallback to cache
   if (url.hostname !== location.hostname) {
