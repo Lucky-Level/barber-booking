@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0f0f">
+  <title>Admin - Barber Booking</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Login -->
+    <div id="login-screen" class="admin-login">
+      <h1 style="color: var(--accent); margin-bottom: 24px;">Admin</h1>
+      <div class="form-group">
+        <input type="password" id="password-input" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+      <p id="login-error" class="hidden" style="color: var(--danger); margin-top: 12px; font-size: 0.85rem;"></p>
+    </div>
+
+    <!-- Admin panel -->
+    <div id="admin-panel" class="hidden">
+      <div class="header">
+        <h1>Barber Booking</h1>
+        <p>Painel de controle</p>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab active" data-tab="availability" onclick="switchTab('availability')">Horarios</button>
+        <button class="tab" data-tab="appointments" onclick="switchTab('appointments')">Agendamentos</button>
+        <button class="tab" data-tab="products" onclick="switchTab('products')">Produtos</button>
+        <button class="tab" data-tab="orders" onclick="switchTab('orders')">Encomendas</button>
+      </div>
+
+      <!-- Tab: Availability -->
+      <div id="tab-availability">
+        <div class="card">
+          <h2>Adicionar disponibilidade</h2>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="av-date">
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1">
+              <label>Inicio</label>
+              <input type="time" id="av-start" value="09:00">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Fim</label>
+              <input type="time" id="av-end" value="18:00">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addAvailability()">Adicionar</button>
+        </div>
+
+        <div class="card">
+          <h2>Proximos dias disponiveis</h2>
+          <ul class="avail-list" id="avail-list"></ul>
+          <p id="avail-empty" class="empty-state hidden">Nenhuma disponibilidade cadastrada.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Appointments -->
+      <div id="tab-appointments" class="hidden">
+        <div class="card">
+          <h2>Filtrar por data</h2>
+          <div class="form-group">
+            <input type="date" id="apt-filter-date" onchange="loadAppointments()">
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Agendamentos</h2>
+          <div id="apt-list"></div>
+          <p id="apt-empty" class="empty-state hidden">Nenhum agendamento nesta data.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Products -->
+      <div id="tab-products" class="hidden">
+        <div class="card">
+          <h2>Adicionar produto</h2>
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="prod-name" placeholder="Ex: Perfume X">
+          </div>
+          <div class="form-group">
+            <label>Descricao</label>
+            <input type="text" id="prod-desc" placeholder="Descricao curta">
+          </div>
+          <div class="form-group">
+            <label>Preco (EUR)</label>
+            <input type="number" id="prod-price" step="0.01" placeholder="25.00">
+          </div>
+          <div class="form-group">
+            <label>Imagem do produto</label>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('prod-image-camera').click()">Tirar foto</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('prod-image-gallery').click()">Galeria</button>
+            </div>
+            <input type="file" id="prod-image-camera" accept="image/*" capture="environment" class="file-input hidden" onchange="handleImageSelect(this)">
+            <input type="file" id="prod-image-gallery" accept="image/*" class="file-input hidden" onchange="handleImageSelect(this)">
+            <div id="prod-image-preview" class="image-preview hidden"></div>
+          </div>
+          <button class="btn btn-primary" onclick="addProduct()">Adicionar produto</button>
+        </div>
+
+        <div class="card">
+          <h2>Produtos cadastrados</h2>
+          <div id="products-list"></div>
+          <p id="products-empty" class="empty-state hidden">Nenhum produto cadastrado.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Orders -->
+      <div id="tab-orders" class="hidden">
+        <div class="card">
+          <h2>Encomendas</h2>
+          <div id="orders-list"></div>
+          <p id="orders-empty" class="empty-state hidden">Nenhuma encomenda.</p>
+        </div>
+      </div>
+
+      <button class="btn btn-outline" style="margin-top: 20px;" onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

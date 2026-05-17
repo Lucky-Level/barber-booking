@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0f0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Barber Booking">
+  <title>Barber Booking</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Barber Booking</h1>
+      <p>Agende seu corte ou encomende produtos</p>
+    </div>
+
+    <!-- Products carousel (main screen) -->
+    <div id="products-carousel-section">
+      <h2 class="section-title">Produtos</h2>
+      <div class="carousel-wrapper">
+        <div class="carousel" id="products-carousel"></div>
+      </div>
+    </div>
+
+    <!-- Main nav tabs -->
+    <div class="tab-bar" id="main-tabs">
+      <button class="tab active" data-tab="booking" onclick="switchMainTab('booking')">Agendar</button>
+      <button class="tab" data-tab="my-booking" onclick="switchMainTab('my-booking')">Meu agendamento</button>
+    </div>
+
+    <!-- TAB: Booking -->
+    <div id="tab-booking">
+      <div class="steps">
+        <div class="step active" data-step="1"></div>
+        <div class="step" data-step="2"></div>
+        <div class="step" data-step="3"></div>
+        <div class="step" data-step="4"></div>
+      </div>
+
+      <!-- Step 1: Service -->
+      <div id="step-1">
+        <div class="card">
+          <h2>Servico</h2>
+          <div class="service-options" id="services-container"></div>
+        </div>
+      </div>
+
+      <!-- Step 2: Date -->
+      <div id="step-2" class="hidden">
+        <div class="card">
+          <button class="back-btn" onclick="navigateBack()">&larr; Voltar</button>
+          <h2>Data</h2>
+          <div class="month-nav">
+            <button id="prev-month">&larr;</button>
+            <span id="month-label"></span>
+            <button id="next-month">&rarr;</button>
+          </div>
+          <div class="date-grid" id="calendar"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Time -->
+      <div id="step-3" class="hidden">
+        <div class="card">
+          <button class="back-btn" onclick="navigateBack()">&larr; Voltar</button>
+          <h2>Horario</h2>
+          <div class="time-grid" id="time-slots"></div>
+          <p id="no-slots" class="empty-state hidden">Sem horarios disponiveis nesta data.</p>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirm -->
+      <div id="step-4" class="hidden">
+        <div class="card">
+          <button class="back-btn" onclick="navigateBack()">&larr; Voltar</button>
+          <h2>Seus dados</h2>
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="client-name" placeholder="Seu nome">
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="client-phone" placeholder="+353 08X XXX XXXX">
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Resumo</h2>
+          <div class="summary">
+            <div class="summary-row">
+              <span class="label">Servico</span>
+              <span id="sum-service"></span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Data</span>
+              <span id="sum-date"></span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Horario</span>
+              <span id="sum-time"></span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Pagamento</span>
+              <span>Cash ou Transfer (IBAN)</span>
+            </div>
+          </div>
+          <div class="alert alert-info">
+            Tolerancia de atraso: 5 minutos. Apos isso o horario pode ser liberado.
+          </div>
+          <button class="btn btn-primary" id="confirm-btn" disabled>Confirmar agendamento</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div id="step-success" class="hidden">
+        <div class="card" style="text-align:center; padding: 40px 20px;">
+          <div style="font-size: 2.5rem; margin-bottom: 12px;">&#9986;</div>
+          <h2 style="color: var(--accent); text-transform: none; letter-spacing: 0; font-size: 1.2rem; margin-bottom: 8px;">Agendamento confirmado!</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;" id="success-details"></p>
+          <button class="btn btn-primary" id="whatsapp-btn">Avisar pelo WhatsApp</button>
+          <button class="btn btn-outline" style="margin-top: 10px;" onclick="location.reload()">Novo agendamento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order modal (fullscreen overlay) -->
+    <div id="order-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="back-btn" onclick="closeOrderModal()">&larr; Voltar</button>
+        <div id="order-product-detail"></div>
+        <div class="alert alert-info" style="margin-top: 14px;">
+          O pagamento do produto e feito antecipadamente no dia do corte, antes do atendimento.
+        </div>
+        <div class="form-group">
+          <label>Seu nome</label>
+          <input type="text" id="order-name" placeholder="Seu nome">
+        </div>
+        <div class="form-group">
+          <label>Seu telefone</label>
+          <input type="tel" id="order-phone" placeholder="+353 08X XXX XXXX">
+        </div>
+        <button class="btn btn-primary" id="order-btn" onclick="submitOrder()">Encomendar</button>
+      </div>
+    </div>
+
+    <!-- Order success -->
+    <div id="order-success" class="modal hidden">
+      <div class="modal-content" style="text-align:center; padding: 60px 20px;">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">&#9989;</div>
+        <h2 style="color: var(--accent); text-transform: none; letter-spacing: 0; font-size: 1.2rem; margin-bottom: 8px;">Encomenda registrada!</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Pague no dia do corte, antes do atendimento.</p>
+        <button class="btn btn-primary" id="order-wa-btn">Avisar pelo WhatsApp</button>
+        <button class="btn btn-outline" style="margin-top: 10px;" onclick="closeOrderSuccess()">Voltar</button>
+      </div>
+    </div>
+
+    <!-- TAB: My Booking (cancel) -->
+    <div id="tab-my-booking" class="hidden">
+      <div class="card">
+        <h2>Consultar meu agendamento</h2>
+        <div class="form-group">
+          <label>Telefone usado no agendamento</label>
+          <input type="tel" id="lookup-phone" placeholder="+353 08X XXX XXXX">
+        </div>
+        <button class="btn btn-primary" onclick="lookupBooking()">Buscar</button>
+      </div>
+      <div id="my-bookings-list"></div>
+      <p id="my-bookings-empty" class="empty-state hidden">Nenhum agendamento encontrado para este telefone.</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/booking.js"></script>
+  <script src="js/shop.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
