@@ -20,6 +20,7 @@ function switchMainTab(tab) {
   });
   document.getElementById('tab-booking').classList.toggle('hidden', tab !== 'booking');
   document.getElementById('tab-my-booking').classList.toggle('hidden', tab !== 'my-booking');
+  document.getElementById('tab-fidelidade').classList.toggle('hidden', tab !== 'fidelidade');
 
   if (tab === 'my-booking') {
     document.getElementById('my-bookings-list').innerHTML = '';

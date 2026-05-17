@@ -34,6 +34,7 @@
     <div class="tab-bar" id="main-tabs">
       <button class="tab active" data-tab="booking" onclick="switchMainTab('booking')">Agendar</button>
       <button class="tab" data-tab="my-booking" onclick="switchMainTab('my-booking')">Meu agendamento</button>
+      <button class="tab" data-tab="fidelidade" onclick="switchMainTab('fidelidade')">Fidelidade</button>
     </div>
 
     <!-- TAB: Booking -->
@@ -162,6 +163,48 @@
       </div>
     </div>
 
+    <!-- TAB: Fidelidade -->
+    <div id="tab-fidelidade" class="hidden">
+      <div class="card">
+        <h2>Meu cartao fidelidade</h2>
+        <div class="form-group">
+          <label>Telefone usado nos agendamentos</label>
+          <input type="tel" id="loyalty-phone" placeholder="+353 08X XXX XXXX">
+        </div>
+        <button class="btn btn-primary" onclick="loadLoyaltyCard()">Ver meu cartao</button>
+      </div>
+      <div id="loyalty-card-container"></div>
+    </div>
+
+    <!-- Celebration overlay -->
+    <div id="celebration-overlay" class="celebration-overlay hidden">
+      <div class="celebration-content">
+        <div class="celeb-icon">&#9986;</div>
+        <h2 id="celeb-title">Obrigado!</h2>
+        <p id="celeb-message">Seu corte foi concluido. Mais um selo no seu cartao fidelidade!</p>
+        <button class="btn btn-primary" id="celeb-close-btn" onclick="closeCelebration()">Ver meu cartao</button>
+      </div>
+    </div>
+
+    <!-- Frequency question -->
+    <div id="freq-overlay" class="celebration-overlay hidden">
+      <div class="celebration-content">
+        <h2>Uma pergunta rapida</h2>
+        <p>De quanto em quanto tempo voce costuma cortar o cabelo?</p>
+        <div class="freq-options">
+          <button class="freq-btn" onclick="setFrequency(15)">15 dias</button>
+          <button class="freq-btn" onclick="setFrequency(20)">20 dias</button>
+          <button class="freq-btn" onclick="setFrequency(30)">30 dias</button>
+          <button class="freq-btn" onclick="setFrequency(45)">45 dias</button>
+          <button class="freq-btn" onclick="setFrequency(60)">60 dias</button>
+        </div>
+        <button class="btn btn-outline" style="margin-top: 16px;" onclick="skipFrequency()">Pular</button>
+      </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti-canvas" class="hidden"></canvas>
+
     <!-- Install PWA banner -->
     <div id="install-banner" class="install-banner hidden">
       <div class="install-banner-text">
@@ -190,6 +233,7 @@
   <script src="js/config.js"></script>
   <script src="js/booking.js"></script>
   <script src="js/shop.js"></script>
+  <script src="js/loyalty.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');

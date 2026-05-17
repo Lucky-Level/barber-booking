@@ -64,9 +64,11 @@ function switchTab(tab) {
   document.getElementById('tab-appointments').classList.toggle('hidden', tab !== 'appointments');
   document.getElementById('tab-products').classList.toggle('hidden', tab !== 'products');
   document.getElementById('tab-orders').classList.toggle('hidden', tab !== 'orders');
+  document.getElementById('tab-followup').classList.toggle('hidden', tab !== 'followup');
 
   if (tab === 'products') loadAdminProducts();
   if (tab === 'orders') loadOrders();
+  if (tab === 'followup') loadFollowups();
 }
 
 // --- Availability ---
@@ -175,9 +177,21 @@ async function loadAppointments() {
     const start = apt.start_time.slice(0, 5);
     const end = apt.end_time.slice(0, 5);
     const isCancelled = apt.status === 'cancelled';
-    const cls = isCancelled ? 'apt-item cancelled' : 'apt-item';
-    const cancelBtn = isCancelled ? '' :
-      `<button class="btn btn-danger btn-sm" onclick="cancelAppointment('${apt.id}')">Cancelar</button>`;
+    const isCompleted = apt.status === 'completed';
+    const cls = isCancelled ? 'apt-item cancelled' : isCompleted ? 'apt-item completed' : 'apt-item';
+
+    let statusHTML = '';
+    if (isCancelled) statusHTML = '<div class="details" style="color:var(--danger)">CANCELADO</div>';
+    if (isCompleted) statusHTML = '<div class="details" style="color:var(--success)">CONCLUIDO</div>';
+
+    let actionsHTML = '';
+    if (!isCancelled && !isCompleted) {
+      actionsHTML = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="completeAppointment('${apt.id}')">Concluido</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelAppointment('${apt.id}')">Cancelar</button>
+        </div>`;
+    }
 
     return `
       <div class="${cls}">
@@ -187,9 +201,9 @@ async function loadAppointments() {
             ${apt.services?.name || 'Servico'} &mdash; ${start} - ${end}
           </div>
           <div class="details">${apt.client_phone}</div>
-          ${isCancelled ? '<div class="details" style="color:var(--danger)">CANCELADO</div>' : ''}
+          ${statusHTML}
         </div>
-        ${cancelBtn}
+        ${actionsHTML}
       </div>
     `;
   }).join('');
@@ -428,4 +442,124 @@ async function updateOrderStatus(id, status) {
     o_status: status
   });
   loadOrders();
+}
+
+// --- Complete Appointment ---
+async function completeAppointment(id) {
+  if (!confirm('Marcar como concluido?')) return;
+
+  const { data } = await db.rpc('admin_complete_appointment', {
+    pwd: adminPassword,
+    apt_id: id
+  });
+
+  if (data?.error) {
+    alert(data.error);
+    return;
+  }
+
+  if (data?.card_complete) {
+    alert('Cliente completou o cartao fidelidade! Proximo corte GRATIS!');
+  } else if (data?.stamps) {
+    alert(`Selo adicionado! Cliente tem ${data.stamps}/10 selos.`);
+  }
+
+  loadAppointments();
+}
+
+// --- Follow-up ---
+async function loadFollowups() {
+  const { data } = await db.from('clients')
+    .select('*')
+    .not('last_completed_at', 'is', null)
+    .order('last_completed_at', { ascending: true });
+
+  const listEl = document.getElementById('followup-list');
+  const emptyEl = document.getElementById('followup-empty');
+  const nofreqEl = document.getElementById('followup-nofreq');
+  const nofreqEmptyEl = document.getElementById('followup-nofreq-empty');
+
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    nofreqEl.innerHTML = '';
+    nofreqEmptyEl.classList.remove('hidden');
+    return;
+  }
+
+  const now = new Date();
+  const withFreq = [];
+  const withoutFreq = [];
+
+  data.forEach(c => {
+    const lastVisit = new Date(c.last_completed_at);
+    const daysSince = Math.floor((now - lastVisit) / (1000 * 60 * 60 * 24));
+
+    if (c.haircut_frequency_days) {
+      const daysUntilDue = c.haircut_frequency_days - daysSince;
+      withFreq.push({ ...c, daysSince, daysUntilDue });
+    } else {
+      withoutFreq.push({ ...c, daysSince });
+    }
+  });
+
+  // Sort by urgency (most overdue first)
+  withFreq.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
+  if (withFreq.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+  } else {
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML = withFreq.map(c => {
+      let dotClass = 'green';
+      let statusText = `Em dia (falta ${c.daysUntilDue} dia${c.daysUntilDue !== 1 ? 's' : ''})`;
+
+      if (c.daysUntilDue <= 0) {
+        dotClass = 'red';
+        statusText = `Atrasado ${Math.abs(c.daysUntilDue)} dia${Math.abs(c.daysUntilDue) !== 1 ? 's' : ''}`;
+      } else if (c.daysUntilDue <= 3) {
+        dotClass = 'yellow';
+        statusText = `Proximo (${c.daysUntilDue} dia${c.daysUntilDue !== 1 ? 's' : ''})`;
+      }
+
+      const lastDate = new Date(c.last_completed_at).toLocaleDateString('pt-BR');
+      const waMsg = `Oi ${c.name.split(' ')[0]}! Ja faz ${c.daysSince} dias desde seu ultimo corte. Quer agendar? https://barber-booking-wine.vercel.app`;
+      const waUrl = `https://wa.me/${c.phone.replace(/\D/g, '')}?text=${encodeURIComponent(waMsg)}`;
+
+      return `
+        <div class="followup-item">
+          <div class="fu-dot ${dotClass}"></div>
+          <div class="fu-info">
+            <div class="fu-name">${c.name}</div>
+            <div class="fu-details">${c.phone} | Ultimo: ${lastDate} (${c.daysSince}d) | Freq: ${c.haircut_frequency_days}d</div>
+            <div class="fu-details" style="color: var(--${dotClass === 'red' ? 'danger' : dotClass === 'yellow' ? 'accent' : 'success'})">${statusText}</div>
+          </div>
+          <a class="wa-send-btn" href="${waUrl}" target="_blank">Enviar</a>
+        </div>`;
+    }).join('');
+  }
+
+  // Clients without frequency
+  if (withoutFreq.length === 0) {
+    nofreqEl.innerHTML = '';
+    nofreqEmptyEl.classList.remove('hidden');
+  } else {
+    nofreqEmptyEl.classList.add('hidden');
+    nofreqEl.innerHTML = withoutFreq.map(c => {
+      const lastDate = new Date(c.last_completed_at).toLocaleDateString('pt-BR');
+      const waMsg = `Oi ${c.name.split(' ')[0]}! Ja faz ${c.daysSince} dias desde seu ultimo corte. Quer agendar? https://barber-booking-wine.vercel.app`;
+      const waUrl = `https://wa.me/${c.phone.replace(/\D/g, '')}?text=${encodeURIComponent(waMsg)}`;
+
+      return `
+        <div class="followup-item">
+          <div class="fu-dot yellow"></div>
+          <div class="fu-info">
+            <div class="fu-name">${c.name}</div>
+            <div class="fu-details">${c.phone} | Ultimo: ${lastDate} (${c.daysSince}d) | Sem frequencia</div>
+          </div>
+          <a class="wa-send-btn" href="${waUrl}" target="_blank">Enviar</a>
+        </div>`;
+    }).join('');
+  }
 }

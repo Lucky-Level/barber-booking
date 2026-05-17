@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barber-booking-v3';
+const CACHE_NAME = 'barber-booking-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   '/js/booking.js',
   '/js/admin.js',
   '/js/shop.js',
+  '/js/loyalty.js',
   '/icons/icon.svg',
   '/manifest.json',
   '/manifest-admin.json'

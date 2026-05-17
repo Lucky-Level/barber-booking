@@ -35,6 +35,7 @@
         <button class="tab" data-tab="appointments" onclick="switchTab('appointments')">Agendamentos</button>
         <button class="tab" data-tab="products" onclick="switchTab('products')">Produtos</button>
         <button class="tab" data-tab="orders" onclick="switchTab('orders')">Encomendas</button>
+        <button class="tab" data-tab="followup" onclick="switchTab('followup')">Follow-up</button>
       </div>
 
       <!-- Tab: Availability -->
@@ -123,6 +124,26 @@
           <h2>Encomendas</h2>
           <div id="orders-list"></div>
           <p id="orders-empty" class="empty-state hidden">Nenhuma encomenda.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Follow-up -->
+      <div id="tab-followup" class="hidden">
+        <div class="card">
+          <h2>Cronograma de follow-up</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            Clientes ordenados por urgencia. Vermelho = atrasado, Amarelo = proximo, Verde = em dia.
+          </p>
+          <div id="followup-list"></div>
+          <p id="followup-empty" class="empty-state hidden">Nenhum cliente com frequencia cadastrada.</p>
+        </div>
+        <div class="card">
+          <h2>Clientes sem frequencia</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            Clientes que ainda nao informaram a frequencia de corte.
+          </p>
+          <div id="followup-nofreq"></div>
+          <p id="followup-nofreq-empty" class="empty-state hidden">Todos os clientes tem frequencia.</p>
         </div>
       </div>
 
