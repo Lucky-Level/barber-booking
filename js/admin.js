@@ -341,16 +341,32 @@ async function toggleProduct(id, active, event) {
 
 async function deleteProduct(id, event) {
   if (event) event.stopPropagation();
-  if (!confirm('Remover este produto?')) return;
+  if (!confirm('Remover este produto e suas encomendas?')) return;
 
   try {
+    // Get related orders and delete them first via admin RPC
+    const { data: orders } = await db.from('orders').select('id').eq('product_id', id);
+    if (orders && orders.length > 0) {
+      for (const o of orders) {
+        await db.rpc('admin_manage_order', {
+          pwd: adminPassword,
+          action: 'delete',
+          o_id: o.id
+        });
+      }
+    }
+
     const { data, error } = await db.rpc('admin_manage_product', {
       pwd: adminPassword,
       action: 'delete',
       p_id: id
     });
-    if (error) console.error('Delete error:', error);
+    if (error) {
+      alert('Erro ao deletar: ' + error.message);
+      console.error('Delete error:', error);
+    }
   } catch (e) {
+    alert('Erro ao deletar produto');
     console.error('Delete exception:', e);
   }
   loadAdminProducts();
