@@ -22,6 +22,69 @@
       <p>Agende seu corte ou encomende produtos</p>
     </div>
 
+    <!-- Client auth bar -->
+    <div id="auth-bar" class="auth-bar">
+      <div id="auth-logged-out">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Entre pra acumular selos no cartao fidelidade</p>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="showAuthModal('login')">Entrar</button>
+          <button class="btn btn-outline btn-sm" onclick="showAuthModal('register')">Criar conta</button>
+        </div>
+      </div>
+      <div id="auth-logged-in" class="hidden">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <span style="font-size: 0.85rem;">Ola, <strong id="auth-user-name" style="color: var(--accent);"></strong></span>
+            <span id="auth-stamps-badge" style="font-size: 0.75rem; color: var(--text-muted); margin-left: 8px;"></span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="clientLogout()">Sair</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth modal -->
+    <div id="auth-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="back-btn" onclick="closeAuthModal()">&larr; Voltar</button>
+        <div id="auth-login-form">
+          <h2 style="color: var(--accent); margin-bottom: 16px; font-size: 1.1rem; text-transform: none; letter-spacing: 0;">Entrar</h2>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="auth-login-phone" placeholder="+353 08X XXX XXXX">
+          </div>
+          <div class="form-group">
+            <label>PIN (4 digitos)</label>
+            <input type="password" id="auth-login-pin" maxlength="4" inputmode="numeric" placeholder="****">
+          </div>
+          <p id="auth-login-error" class="hidden" style="color: var(--danger); font-size: 0.8rem; margin-bottom: 10px;"></p>
+          <button class="btn btn-primary" onclick="doClientLogin()">Entrar</button>
+          <p style="text-align:center; margin-top: 14px; font-size: 0.8rem; color: var(--text-muted);">
+            Nao tem conta? <a href="#" onclick="switchAuthForm('register'); return false;" style="color: var(--accent);">Criar conta</a>
+          </p>
+        </div>
+        <div id="auth-register-form" class="hidden">
+          <h2 style="color: var(--accent); margin-bottom: 16px; font-size: 1.1rem; text-transform: none; letter-spacing: 0;">Criar conta</h2>
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="auth-reg-name" placeholder="Seu nome">
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="tel" id="auth-reg-phone" placeholder="+353 08X XXX XXXX">
+          </div>
+          <div class="form-group">
+            <label>Criar PIN (4 digitos)</label>
+            <input type="password" id="auth-reg-pin" maxlength="4" inputmode="numeric" placeholder="****">
+          </div>
+          <p id="auth-reg-error" class="hidden" style="color: var(--danger); font-size: 0.8rem; margin-bottom: 10px;"></p>
+          <button class="btn btn-primary" onclick="doClientRegister()">Criar conta</button>
+          <p style="text-align:center; margin-top: 14px; font-size: 0.8rem; color: var(--text-muted);">
+            Ja tem conta? <a href="#" onclick="switchAuthForm('login'); return false;" style="color: var(--accent);">Entrar</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Products carousel (main screen) -->
     <div id="products-carousel-section">
       <h2 class="section-title">Produtos</h2>
@@ -234,6 +297,7 @@
   <script src="js/booking.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/loyalty.js"></script>
+  <script src="js/auth.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');

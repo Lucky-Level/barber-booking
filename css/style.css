@@ -722,6 +722,15 @@ body {
   flex-shrink: 0;
 }
 
+/* Auth bar */
+.auth-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
 /* Loyalty Card */
 .loyalty-card {
   background: #1c1c1c;

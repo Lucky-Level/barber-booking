@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barber-booking-v4';
+const CACHE_NAME = 'barber-booking-v6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   '/js/admin.js',
   '/js/shop.js',
   '/js/loyalty.js',
+  '/js/auth.js',
   '/icons/icon.svg',
   '/manifest.json',
   '/manifest-admin.json'
@@ -40,6 +41,9 @@ self.addEventListener('fetch', (e) => {
   if (url.hostname.includes('supabase.co')) {
     return;
   }
+
+  // Skip non-http(s) schemes (chrome-extension, etc)
+  if (!url.protocol.startsWith('http')) return;
 
   // CDN resources - network first, fallback to cache
   if (url.hostname !== location.hostname) {
